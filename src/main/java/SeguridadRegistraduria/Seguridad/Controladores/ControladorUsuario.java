@@ -6,6 +6,9 @@ import SeguridadRegistraduria.Seguridad.Repositorios.RepositorioUsuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -94,5 +97,18 @@ public class ControladorUsuario {
         Rol rolActual=this.miRepositorioRol.findById(id_rol).orElseThrow(RuntimeException::new);
         usuarioActual.setRol(rolActual);
         return this.miRepositorioUsuario.save(usuarioActual);
+    }
+
+    @PostMapping("/validar")
+    public Usuario validar(@RequestBody Usuario infoUsuario, final HttpServletResponse response) throws IOException {
+        Usuario usuarioActual=this.miRepositorioUsuario
+                .getUserByEmail(infoUsuario.getCorreo());
+        if (usuarioActual!=null && usuarioActual.getContrasena().equals(convertirSHA256(infoUsuario.getContrasena()))) {
+            usuarioActual.setContrasena("");
+            return usuarioActual;
+        }else{
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return null;
+        }
     }
 }

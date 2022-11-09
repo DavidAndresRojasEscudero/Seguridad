@@ -75,6 +75,7 @@ public PermisosRoles create(@PathVariable String id_rol,@PathVariable String id_
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
+
     @DeleteMapping("{id}")
     public void delete(@PathVariable String id){
         PermisosRoles permisosRolesActual=this.miRepositorioPermisoRoles
@@ -82,6 +83,17 @@ public PermisosRoles create(@PathVariable String id_rol,@PathVariable String id_
                 .orElse(null);
         if (permisosRolesActual!=null){
             this.miRepositorioPermisoRoles.delete(permisosRolesActual);
+        }
+    }
+
+    @GetMapping("validar-permiso/rol/{id_rol}")
+    public PermisosRoles getPermiso(@PathVariable String id_rol,@RequestBody Permiso infoPermiso){
+        Permiso elPermiso=this.miRepositorioPermiso.getPermiso(infoPermiso.getUrl(), infoPermiso.getMetodo());
+        Rol elRol=this.miRepositorioRol.findById(id_rol).get();
+        if (elPermiso!=null && elRol!=null){
+            return this.miRepositorioPermisoRoles.getPermisoRol(elRol.get_id(),elPermiso.get_id());
+        }else{
+            return null;
         }
     }
 }
